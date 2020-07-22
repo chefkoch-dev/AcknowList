@@ -70,24 +70,24 @@ open class AcknowParser {
     /**
      Parses the array of acknowledgements.
 
+     - Parameters:
+       - removeHeaderAndFooter: If `true` the first and last items in the plist are treated as header and footer and not part of the acknowledgements list. Default is `true` for backwards compatibility.
+
      - return: an array of `Acknow` instances.
      */
-    open func parseAcknowledgements() -> [Acknow] {
+    open func parseAcknowledgements(removeHeaderAndFooter: Bool = true) -> [Acknow] {
         let preferenceSpecifiers: AnyObject? = rootDictionary["PreferenceSpecifiers"]
 
         if let preferenceSpecifiers = preferenceSpecifiers, preferenceSpecifiers is [AnyObject] {
-            let preferenceSpecifiersArray = preferenceSpecifiers as! [AnyObject]
+            var preferenceSpecifiersArray = preferenceSpecifiers as! [AnyObject]
 
-            // Remove the header and footer
-            let ackPreferenceSpecifiers = preferenceSpecifiersArray.filter({ (object: AnyObject) -> Bool in
-                if let firstObject = preferenceSpecifiersArray.first,
-                    let lastObject = preferenceSpecifiersArray.last {
-                        return (object.isEqual(firstObject) == false && object.isEqual(lastObject) == false)
-                }
-                return true
-            })
+            // Remove the header and footer if needed
+            if removeHeaderAndFooter && preferenceSpecifiersArray.count >= 2 {
+                preferenceSpecifiersArray.removeFirst()
+                preferenceSpecifiersArray.removeLast()
+            }
 
-            let acknowledgements = ackPreferenceSpecifiers.map({
+            let acknowledgements = preferenceSpecifiersArray.map({
                 (preferenceSpecifier: AnyObject) -> Acknow in
                 if let title = preferenceSpecifier["Title"] as! String?,
                     let text = preferenceSpecifier["FooterText"] as! String? {
