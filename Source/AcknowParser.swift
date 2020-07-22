@@ -79,19 +79,15 @@ open class AcknowParser {
         let preferenceSpecifiers: AnyObject? = rootDictionary["PreferenceSpecifiers"]
 
         if let preferenceSpecifiers = preferenceSpecifiers, preferenceSpecifiers is [AnyObject] {
-            let preferenceSpecifiersArray = preferenceSpecifiers as! [AnyObject]
+            var preferenceSpecifiersArray = preferenceSpecifiers as! [AnyObject]
 
             // Remove the header and footer if needed
-            let ackPreferenceSpecifiers = preferenceSpecifiersArray.filter({ (object: AnyObject) -> Bool in
-                if removeHeaderAndFooter,
-                    let firstObject = preferenceSpecifiersArray.first,
-                    let lastObject = preferenceSpecifiersArray.last {
-                    return (object.isEqual(firstObject) == false && object.isEqual(lastObject) == false)
-                }
-                return true
-            })
+            if removeHeaderAndFooter && preferenceSpecifiersArray.count >= 2 {
+                preferenceSpecifiersArray.removeFirst()
+                preferenceSpecifiersArray.removeLast()
+            }
 
-            let acknowledgements = ackPreferenceSpecifiers.map({
+            let acknowledgements = preferenceSpecifiersArray.map({
                 (preferenceSpecifier: AnyObject) -> Acknow in
                 if let title = preferenceSpecifier["Title"] as! String?,
                     let text = preferenceSpecifier["FooterText"] as! String? {
